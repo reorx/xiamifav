@@ -1,10 +1,13 @@
+import os
+
+
 PROJECT = 'xiamifav'
 
 LOCALE = 'en_US'
 
 PROCESSES = 1
 
-PORT = 7000
+PORT = os.environ.get('PORT', 27853)
 
 DEBUG = True
 
