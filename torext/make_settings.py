@@ -45,7 +45,7 @@ class Settings(dict, SingletonMixin):
         from torext import base_settings
 
         for i in dir(base_settings):
-            if not i.startswith('_'):
+            if not i.startswith('_') and i == i.upper():
                 self[i] = getattr(base_settings, i)
 
         self._module = None

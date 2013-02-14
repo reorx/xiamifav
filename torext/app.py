@@ -147,7 +147,7 @@ class TorextApp(object):
 
         self.update_settings(dict(
             [(i, getattr(settings_module, i)) for i in dir(settings_module)
-             if not i.startswith('_')]))
+             if not i.startswith('_') and i == i.upper()]))
 
         settings._module = settings_module
 
