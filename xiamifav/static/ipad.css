@@ -1,5 +1,43 @@
+.login {
+    width: 60%;
+    margin-left: -30%;
+    margin-top: -25%;
+}
+.login input[type="text"],
+.login input[type="password"] {
+    font-size: 2em;
+    margin-bottom: 1em;
+    padding: 0.3em 0.3em;
+}
+.login input[type="submit"] {
+    margin: 0 auto;
+    margin-top: 1em;
+    margin-bottom: 1em;
+    font-size: 1.5em;
+    line-height: 0.8em;
+    padding: 0.5em 1em;
+}
+.toggler {
+    width: 2.6em;
+    height: 2.6em;
+    margin-top: 1em;
+    margin-bottom: 1.5em;
+}
+.toggler div {
+    width: 1.8em;
+    height: 1.8em;
+    margin: 0.4em;
+}
 
 .playlist-wrapper {
     width: auto;
-    margin: 0 15px;
+    margin: 0 0.5em;
+}
+.control li a {
+    padding: 1em 0.5em;
+    font-size: 1.8em;
+}
+.playlist li span {
+    font-size: 1.5em;
+    padding: 1em 0.5em;
 }
