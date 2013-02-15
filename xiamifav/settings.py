@@ -7,7 +7,7 @@ LOCALE = 'en_US'
 
 PROCESSES = 1
 
-PORT = os.environ.get('PORT', 27853)
+PORT = os.environ.get('PORT', 7000)
 
 DEBUG = True
 

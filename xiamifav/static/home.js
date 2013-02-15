@@ -1,6 +1,25 @@
 $(function() {
+
+    function bindTap(target, name, onTapFn, endTapFn) {
+        var onEvents = 'mousedown.' + name + ' ' +
+            'touchstart.' + name;
+        var endEvents= 'mousemove.' + name + ' ' +
+            'mouseup.' + name + ' ' +
+            'touchmove.' + name + ' ' +
+            'touchend.' + name;
+        //console.log(onEvents, endEvents);
+
+        target.bind(onEvents, function() {
+            console.log('on tap');
+            onTapFn();
+            $(document).bind(endEvents, function() {
+                $(document).unbind(endEvents);
+                endTapFn();
+            });
+        })
+    }
     Backbone.sync = function(opts, model) {
-        console.log('now sync', opts, model)
+        alert('Backbone.sync was called, which is unexpected to happen');
     }
 
     var PlayerView = Backbone.View.extend({
@@ -29,9 +48,13 @@ $(function() {
         initialize: function(args) {
             this.user_id = args.user_id;
             this.page = 0;
+            this.retries = 0;
+            this.maxRetries = 3;
         },
         fetchPage: function() {
             console.log('fetch page, uid', this.user_id, ', page', this.page + 1);
+            this.trigger('fetching');
+
             var _this = this;
             $.getJSON(
                 '/api_proxy/fav_songs',
@@ -41,14 +64,20 @@ $(function() {
                 },
                 function(data) {
                     console.log('/fav_songs response', data);
+
                     if (!data || !data.songs) {
-                        $('.playlist').after($('<div class="nosongs">no songs</div>'));
+                        _this.retries += 1;
+                        if (_this.retries >= _this.maxRetries)
+                            _this.trigger('fetchAbandoned');
+                        else
+                            _this.trigger('fetchFailed');
                         return;
                     }
                     data.songs.forEach(function(songData) {
                         song = new _this.model(songData);
                         _this.add(song);
                     });
+                    _this.trigger('fetched');
                 }
             );
         }
@@ -155,13 +184,8 @@ $(function() {
                 logoutButton.removeClass('active');
             });
 
-            $(window).bind('scroll', function() {
-                console.log('scroll');
-                if($(document).height() == $(window).scrollTop() + $(window).height()){
-                    console.log('scroll to end');
-                    _this.Songs.fetchPage();
-                }
-            })
+            // jquery elements
+            this.notice = this.$el.find('.loading_notice');
 
             this.user_id = $.cookie('user_id');
             $('.loading').fadeOut(300, function() {
@@ -175,6 +199,70 @@ $(function() {
                     });
                 }
             })
+        },
+        initPlaylist: function() {
+            this.Songs = new SongCollection({user_id: this.user_id});
+            this.listenTo(this.Songs, 'add', this.addSong);
+            this.listenTo(this.Songs, 'fetching', _.partial(this.onFetching));
+            this.listenTo(this.Songs, 'fetched', _.partial(this.onFetched));
+            this.listenTo(this.Songs, 'fetchFailed', _.partial(this.onFetchFailed));
+            this.listenTo(this.Songs, 'fetchAbandoned', _.partial(this.onFetchAbandoned));
+
+            // data fetching and app rendering now starts
+            this.Songs.fetchPage();
+        },
+        bindScroll: function() {
+            var _this = this;
+            $(window).bind('scroll', function() {
+                if($(document).height() == $(window).scrollTop() + $(window).height()){
+                    console.log('scrolled to end');
+                    _this.Songs.fetchPage();
+                }
+            });
+        },
+        unbindScroll: function() {
+            $(window).unbind('scroll');
+        },
+        onFetching: function() {
+            console.log('fetching');
+            this.unbindScroll();
+            //this.fetchNotice('fetching');
+            this.notice.html('fetching').stop(true, true).slideDown(0, function() {
+                $("html, body").animate({ scrollTop: $(document).height() - 1 }, 0);
+            });
+        },
+        onFetched: function() {
+            var _this = this;
+            this.notice.html('').stop(true, true).slideUp(0, function() {
+                _this.bindScroll();
+            });
+        },
+        onFetchFailed: function() {
+            //this.fetchNotice('no songs');
+            //this.bindScroll();
+            this.notice.html('no songs');
+            this.bindScroll();
+        },
+        onFetchAbandoned: function() {
+            this.notice.html('really, really no songs');
+        },
+        fetchNotice: function(s) {
+            var notice = this.$el.find('.loading_notice');
+            var scrollToBottom = function() {
+                $("html, body").animate({ scrollTop: $(document).height() - 1 }, 300);
+            }
+            if (!s) {
+                console.log('no message');
+                notice.html('').stop(true, true).slideUp(500);
+            } else {
+                notice.html(s).stop(true, true).slideDown(500, function() {
+                    scrollToBottom();
+                });
+            }
+        },
+        clearPlaylist: function() {
+            $('.playlist').empty();
+            delete this.Songs;
         },
         toggleLogin: function(tf, callback) {
             if (tf) {
@@ -190,18 +278,13 @@ $(function() {
         togglePlaylist: function(tf, callback) {
             var _this = this;
             if (tf) {
-                this.Songs = new SongCollection({user_id: this.user_id});
-                this.listenTo(this.Songs, 'add', this.addSong);
-                // data fetching and app rendering now starts
-                this.Songs.fetchPage();
+                _this.initPlaylist();
                 $('.playlist-wrapper').fadeIn(300, function() {
                     if (callback) callback();
                 });
             } else {
                 $('.playlist-wrapper').fadeOut(300, function() {
-                    $('.playlist').empty();
-                    $('.nosongs').remove();
-                    delete _this.Songs;
+                    _this.clearPlaylist();
                     if (callback) callback();
                 });
             }
@@ -295,25 +378,6 @@ $(function() {
             this.$el.find('.playlist').append(view.el);
         },
     });
-
-    function bindTap(target, name, onTapFn, endTapFn) {
-        var onEvents = 'mousedown.' + name + ' ' +
-            'touchstart.' + name;
-        var endEvents= 'mousemove.' + name + ' ' +
-            'mouseup.' + name + ' ' +
-            'touchmove.' + name + ' ' +
-            'touchend.' + name;
-        //console.log(onEvents, endEvents);
-
-        target.bind(onEvents, function() {
-            console.log('on tap');
-            onTapFn();
-            $(document).bind(endEvents, function() {
-                $(document).unbind(endEvents);
-                endTapFn();
-            });
-        })
-    }
 
     var App = new AppView();
 

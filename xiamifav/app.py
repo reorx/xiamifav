@@ -35,7 +35,7 @@ class BaseHandler(_BaseHandler):
 @app.route('/')
 class HomeHandler(BaseHandler):
     def get(self):
-        self.render('home.html')
+        self.render('home.html', user_id=self.get_argument('user_id', None))
 
 
 @app.route('/login')

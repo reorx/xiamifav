@@ -5,6 +5,12 @@
     <title></title>
     <link media="all" rel="stylesheet" href="/static/normalize.css" type="text/css" />
     <link media="all" rel="stylesheet" href="/static/home.css" type="text/css" />
+    <link media="only screen and (min-device-width : 768px) and (max-device-width : 1024px)" rel="stylesheet"
+    href="/static/ipad.css" type="text/css" />
+    <!--
+    <link media="only screen and (max-device-width: 480px)" rel="stylesheet"
+    href="/static/mobile.css" type="text/css" />
+    -->
 </head>
 <body>
     <div class="loading">Loading</div>
@@ -13,7 +19,7 @@
         <div class="toggler"><div></div></div>
 
         <form class="user_id_area active">
-            <input id="input_user_id" name="user_id" type="text" placeholder="user id" required/>
+            <input id="input_user_id" name="user_id" type="text" placeholder="user id" required value="{% if user_id %}{{ user_id }}{% end %}"/>
 
             <input type="submit" value="Login" class="blue-button"/>
         </form>
@@ -31,8 +37,9 @@
         <ul class="control white-button-menu">
             <li class="logout"><a href="#">LOGOUT</a></li>
         </ul>
-        <ul class="playlist apple-menu">
+        <ul class="playlist apple-blue-menu">
         </ul>
+        <div class="loading_notice"></div>
     </div>
 
     <iframe class="_player" style="display: none;"></iframe>
