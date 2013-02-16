@@ -8,9 +8,8 @@ app = TorextApp(settings)
 app.setup()
 
 import logging
+import requests
 from Cookie import SimpleCookie
-from tornado.web import asynchronous
-from tornado.httpclient import AsyncHTTPClient, HTTPClient
 from xiamifav.base import BaseHandler, HomeHandler
 
 
@@ -27,11 +26,10 @@ class LoginHandler(BaseHandler):
             'User-Agent': settings.FAKE_USER_AGENT,
         }
 
-        client = HTTPClient()
-        resp = client.fetch(url, headers=headers)
-        logging.debug('login resp: %s', resp.body)
+        resp = requests.get(url, headers=headers)
+        logging.debug('login resp: %s', resp.content)
 
-        data = self.json_decode(resp.body)
+        data = self.json_decode(resp.content)
         if data['status'] != 'ok' or not 'user_id' in data:
             return self.json_error(401, 'login failed')
         self.set_cookie('user_id', data['user_id'])
@@ -47,7 +45,6 @@ class LoginHandler(BaseHandler):
 
 
 class APIProxyHandler(BaseHandler):
-    @asynchronous
     def get(self, api_name):
         if not api_name in settings.API_URLS:
             return self.json_error(400, 'api unexist')
@@ -67,12 +64,9 @@ class APIProxyHandler(BaseHandler):
             cookie['member_auth'] = auth_token
             headers['Cookie'] = cookie.output().lstrip('Set-Cookie: ')
 
-        client = AsyncHTTPClient()
-        client.fetch(url, self._on_api_response, headers=headers)
-
-    def _on_api_response(self, resp):
-        logging.debug('api resp: %s', resp.body)
-        self.write(resp.body)
+        resp = requests.get(url, headers=headers)
+        logging.debug('api resp: %s', resp.content)
+        self.write(resp.content)
         self.finish()
 
 
@@ -82,7 +76,11 @@ app.route_many([
     ('/api_proxy/(\w+)', APIProxyHandler)
 ])
 
+
 if __name__ == '__main__':
+    import wsgiref.simple_server
 
     app.command_line_config()
-    app.run()
+
+    server = wsgiref.simple_server.make_server('', 7000, app.wsgi_application())
+    server.serve_forever()

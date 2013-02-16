@@ -10,6 +10,6 @@ enjoying music has never be so easy before.
 TODO
 ----
 
-* login button tap effect
-* loading effect of songs (show playlist first, then load)
+* song title -> page title
 * player control on top (shoud be display:fixed)
+* loading effect of songs (show playlist first, then load)
