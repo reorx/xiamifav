@@ -25,7 +25,7 @@ $(function() {
     var PlayerView = Backbone.View.extend({
         initialize: function() {
             this.$core = $('iframe._player').contents().find('body');
-            this.$core.append($('<audio>').addClass('now'))
+            this.$core.append($('<audio type="audio/mp3">').addClass('now'))
                 .append($('<audio>').addClass('next'));
             this.$now = this.$core.find('.now');
             this.now = this.$now.get(0);
