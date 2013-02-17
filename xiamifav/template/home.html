@@ -34,15 +34,39 @@
     </div>
 
     <div class="playlist-wrapper" style="display: none;">
-        <ul class="control white-button-menu">
-            <li class="logout"><a href="#">LOGOUT</a></li>
-        </ul>
+        <div class="control white-button-menu">
+            <!--
+            <div class="settings">
+                <a href="#" class="shuffle">Shuffle</a>
+                <a href="#" class="autoplay">Autoplay</a>
+            </div>
+            -->
+            <div class="core">
+                <a class="prev" href="#"><img src="/static/player-previous.png"></a>
+                <a class="play" href="#">
+                    <img class="play-img" src="/static/player-play.png">
+                    <img class="pause-img" src="/static/player-pause.png" style="display: none;">
+                </a>
+                <a class="next" href="#"><img src="/static/player-next.png"></a>
+            </div>
+            <div class="nav-wrapper">
+                <div class="toggler">menu</div> 
+                <ul class="nav">
+                    <li class=""><a href="#!/collects">collects</a></li>
+                    <li class=""><a href="#!/albums">albums</a></li>
+                    <li class=""><a href="#!/songs">songs</a></li>
+                    <li class=""><a href="#!/about">about</a></li>
+                    <li class="logout"><a href="#!/logout">logout</a></li>
+                </ul>
+            </div>
+        </div>
         <ul class="playlist apple-blue-menu">
         </ul>
         <div class="loading_notice"></div>
     </div>
 
-    <iframe class="_player" style="display: none;"></iframe>
+    <iframe name="_player" id="_player" style="display: none;"></iframe>
+
 
     <script id="template-song" type="text/template">
         <span class="title"><%- name %></span>

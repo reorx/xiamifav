@@ -23,12 +23,37 @@ $(function() {
     }
 
     var PlayerView = Backbone.View.extend({
+        el: '.control',
+        events: {
+            'click .play': 'operatePlay',
+            'click .prev': 'operatePrev',
+            'click .next': 'operateNext',
+            //'click .nav-wrapper .toggler': 'toggleNav',
+            'click .nav .logout': 'logout',
+        },
         initialize: function() {
-            this.$core = $('iframe._player').contents().find('body');
-            this.$core.append($('<audio type="audio/mp3">').addClass('now'))
+            console.log('init');
+            this.$core = $('#_player').contents().find('body');
+            this.$core.append($('<audio>').attr('type', 'audio/mp3').addClass('now'))
                 .append($('<audio>').addClass('next'));
             this.$now = this.$core.find('.now');
             this.now = this.$now.get(0);
+
+            var _this = this;
+                toggler = this.$el.find('.nav-wrapper .toggler'),
+                nav = this.$el.find('.nav'),
+                showAndBind = function() {
+                    toggler.unbind('click');
+                    nav.show(function() {
+                        $(document).bind('click.hideNav', function() {
+                            $(document).unbind('click.hideNav');
+                            nav.hide(function() {
+                                toggler.bind('click', showAndBind);
+                            })
+                        });
+                    })
+                };
+            toggler.bind('click', showAndBind);
         },
         play: function(url) {
             this.now.src = url;
@@ -38,6 +63,42 @@ $(function() {
         pause: function() {
             this.now.pause();
         },
+        toggleNav: function() {
+            var nav = this.$el.find('.nav');
+            if (nav.is(':visible')) {
+                nav.hide();
+            } else {
+                nav.show();
+            }
+        },
+        operatePlay: function() {
+            var _this = this;
+            if (this.now.src) {
+                if (this.now.paused) {
+                    this.now.play();
+                    this.switchPlayButton(true);
+                } else {
+                    this.now.pause();
+                    this.switchPlayButton(false);
+                }
+            }
+        },
+        switchPlayButton: function(tf) {
+            if (tf) {
+                this.$el.find('.play-img').stop(true).hide();
+                this.$el.find('.pause-img').stop(true).show();
+            } else {
+                this.$el.find('.pause-img').stop(true).hide();
+                this.$el.find('.play-img').stop(true).show();
+            }
+        },
+        operatePrev: function() {
+        },
+        operateNext: function() {
+        },
+        logout: function() {
+            App.logout();
+        }
     });
     Player = new PlayerView();
 
@@ -143,6 +204,7 @@ $(function() {
             })
 
             Player.play(this.model.get('location'));
+            Player.switchPlayButton(true);
         },
         playNext: function() {
             if (!this.next) {
@@ -171,13 +233,12 @@ $(function() {
             'click .login .toggler': 'toggleLoginArea',
             'submit .user_id_area': 'idLogin',
             'submit .userinfo_area': 'infoLogin',
-            'click .control .logout': 'logout',
         },
         initialize: function() {
             var _this = this;
 
             // extra event binding
-            var logoutButton = this.$el.find('.control .logout a');
+            var logoutButton = this.$el.find('.nav .logout a');
             bindTap(logoutButton, 'logoutButton', function() {
                 logoutButton.addClass('active');
             }, function() {
@@ -366,8 +427,6 @@ $(function() {
             _this.togglePlaylist(false, function() {
                 _this.toggleLogin(true);
             });
-        },
-        logoutLight: function(e) {
         },
         addSong: function(song) {
             var view = new SongView({model: song});
