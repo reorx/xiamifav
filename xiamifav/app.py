@@ -7,6 +7,7 @@ import logging
 import tornado.web
 import tornado.ioloop
 import tornado.options
+import tornado.escape
 from tornado.httpclient import AsyncHTTPClient, HTTPClient
 from Cookie import SimpleCookie
 
@@ -17,6 +18,7 @@ from base import BaseHandler, HomeHandler
 class LoginHandler(BaseHandler):
     URL = 'http://www.xiami.com/app/iphone/login/email/%(email)s/pwd/%(password)s'
 
+    @tornado.web.asynchronous
     def post(self):
         try:
             url = self.URL % self._single_value_arguments()
@@ -27,13 +29,18 @@ class LoginHandler(BaseHandler):
             'User-Agent': settings.FAKE_USER_AGENT,
         }
 
-        client = HTTPClient()
-        resp = client.fetch(url, headers=headers)
+        #client = HTTPClient()
+        client = AsyncHTTPClient()
+        #resp = client.fetch(url, headers=headers)
+        client.fetch(url, self._on_api_response, headers=headers)
+
+    def _on_api_response(self, resp):
         logging.debug('login resp: %s', resp.body)
 
-        data = self.json_decode(resp.body)
+        data = tornado.escape.json_decode(resp.body)
         if data['status'] != 'ok' or not 'user_id' in data:
-            return self.json_error(401, 'login failed')
+            self.json_error(401, 'login failed')
+            return
         self.set_cookie('user_id', data['user_id'])
 
         cookie_str = resp.headers.get('Set-Cookie')
@@ -44,6 +51,7 @@ class LoginHandler(BaseHandler):
                 auth_token = cookie.get(settings.XIAMI_AUTH_COOKIE).value
                 self.set_cookie(settings.XIAMI_AUTH_COOKIE, auth_token)
         self.write(resp.body)
+        self.finish()
 
 
 class APIProxyHandler(BaseHandler):
