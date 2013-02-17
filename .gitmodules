@@ -1,3 +1,0 @@
-[submodule "torext"]
-	path = torext
-	url = git@github.com:reorx/torext.git
