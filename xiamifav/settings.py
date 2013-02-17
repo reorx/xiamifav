@@ -1,5 +1,7 @@
 import os
 
+root = os.path.dirname(__file__)
+
 
 PROJECT = 'xiamifav'
 
@@ -23,9 +25,9 @@ LOG_RESPONSE = False
 
 TIME_ZONE = 'Asia/Shanghai'
 
-STATIC_PATH = 'static'
+STATIC_PATH = os.path.join(root, 'static')
 
-TEMPLATE_PATH = 'template'
+TEMPLATE_PATH = os.path.join(root, 'template')
 
 LOGGING_IGNORE_URLS = [
     '/favicon.ico',

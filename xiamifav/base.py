@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from torext.handlers import BaseHandler as _BaseHandler
+from tornado.web import RequestHandler
 
 
-class BaseHandler(_BaseHandler):
+class BaseHandler(RequestHandler):
     def json_error(self, status_code, msg):
         self.set_status(status_code)
         self.write({'error': msg})

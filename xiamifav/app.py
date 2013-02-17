@@ -1,17 +1,17 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from torext.app import TorextApp
-import settings
 
-app = TorextApp(settings)
-app.setup()
-
+import os
 import logging
-from Cookie import SimpleCookie
-from tornado.web import asynchronous
+import tornado.web
+import tornado.ioloop
+import tornado.options
 from tornado.httpclient import AsyncHTTPClient, HTTPClient
-from xiamifav.base import BaseHandler, HomeHandler
+from Cookie import SimpleCookie
+
+import settings
+from base import BaseHandler, HomeHandler
 
 
 class LoginHandler(BaseHandler):
@@ -47,7 +47,7 @@ class LoginHandler(BaseHandler):
 
 
 class APIProxyHandler(BaseHandler):
-    @asynchronous
+    @tornado.web.asynchronous
     def get(self, api_name):
         if not api_name in settings.API_URLS:
             return self.json_error(400, 'api unexist')
@@ -76,13 +76,21 @@ class APIProxyHandler(BaseHandler):
         self.finish()
 
 
-app.route_many([
-    ('/', HomeHandler),
-    ('/login', LoginHandler),
-    ('/api_proxy/(\w+)', APIProxyHandler)
-])
+application = tornado.web.Application(
+    [
+        ('/', HomeHandler),
+        ('/login', LoginHandler),
+        ('/api_proxy/(\w+)', APIProxyHandler)
+    ],
+    template_path=settings.TEMPLATE_PATH,
+    static_path=settings.STATIC_PATH,
+    debug=True)
+
 
 if __name__ == '__main__':
-
-    app.command_line_config()
-    app.run()
+    logging.getLogger().setLevel(logging.INFO)
+    tornado.options.enable_pretty_logging()
+    port = os.environ.get('PORT', 7000)
+    logging.info('port: %s', port)
+    application.listen(port)
+    tornado.ioloop.IOLoop.instance().start()
