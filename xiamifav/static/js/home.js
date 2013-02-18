@@ -314,13 +314,12 @@ $(function() {
             this.Songs.fetchPage();
 
             // ui events
-            /*
-            $(document).bind('scroll.control', function() {
+            $(window).bind('scroll.control', function() {
                 console.log('scrolled');
                 App.fixControlPosition();
-                $(document).unbind('scroll.control');
+                $(window).unbind('scroll.control');
             });
-            */
+
             $(window).bind('keydown', function(e) {
                 if (e.keyCode == 32) {
                     Player.operatePlay();
