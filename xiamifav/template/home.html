@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>XiamiFav</title>
     <link media="all" rel="stylesheet" href="/static/css/normalize.css" type="text/css" />
     <link media="all" rel="stylesheet" href="/static/css/home.css" type="text/css" />
     <link media="only screen and (min-device-width : 768px) and (max-device-width : 1024px)" rel="stylesheet"
@@ -47,30 +47,29 @@
     </div>
 
     <div class="playlist-wrapper" style="display: none;">
-        <div class="control white-button-menu">
-            <!--
-            <div class="settings">
-                <a href="#" class="shuffle">Shuffle</a>
-                <a href="#" class="autoplay">Autoplay</a>
-            </div>
-            -->
-            <div class="core">
-                <a class="prev" href="#"><img src="/static/img/player-previous.png"></a>
-                <a class="play" href="#">
-                    <img class="play-img" src="/static/img/player-play.png">
-                    <img class="pause-img" src="/static/img/player-pause.png" style="display: none;">
-                </a>
-                <a class="next" href="#"><img src="/static/img/player-next.png"></a>
-            </div>
-            <div class="nav-wrapper">
-                <div class="toggler">menu</div> 
-                <ul class="nav">
-                    <li class=""><a href="#!/collects">collects</a></li>
-                    <li class=""><a href="#!/albums">albums</a></li>
-                    <li class=""><a href="#!/songs">songs</a></li>
-                    <li class=""><a href="#!/about">about</a></li>
-                    <li class="logout"><a href="#!/logout">logout</a></li>
-                </ul>
+        <div class="control-wrapper">
+            <div class="control white-button-menu">
+                <!--
+                <div class="settings">
+                    <a href="#" class="shuffle">Shuffle</a>
+                    <a href="#" class="autoplay">Autoplay</a>
+                </div>
+                -->
+                <div class="core">
+                    <a class="prev" href="#"></a>
+                    <a class="play" href="#" class="paused"></a>
+                    <a class="next" href="#"></a>
+                </div>
+                <div class="nav-wrapper">
+                    <div class="toggler">menu</div> 
+                    <ul class="nav">
+                        <li class=""><a href="#!/collects">collects</a></li>
+                        <li class=""><a href="#!/albums">albums</a></li>
+                        <li class=""><a href="#!/songs">songs</a></li>
+                        <li class=""><a href="#!/about">about</a></li>
+                        <li class="logout"><a href="#!/logout">logout</a></li>
+                    </ul>
+                </div>
             </div>
         </div>
         <ul class="playlist apple-blue-menu">

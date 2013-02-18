@@ -38,14 +38,26 @@ $(function() {
                 .append($('<audio>').addClass('next'));
             this.$now = this.$core.find('.now');
             this.now = this.$now.get(0);
+            this.playingView = undefined;
+
+            this.$el.find('.core a').each(function() {
+                var $this = $(this);
+                bindTap($this, 'controlButton', function() {
+                    $this.addClass('active');
+                }, function() {
+                    $this.removeClass('active');
+                })
+            });
 
             var _this = this;
                 toggler = this.$el.find('.nav-wrapper .toggler'),
                 nav = this.$el.find('.nav'),
                 showAndBind = function() {
+                    toggler.addClass('opened');
                     toggler.unbind('click');
                     nav.show(function() {
                         $(document).bind('click.hideNav', function() {
+                            toggler.removeClass('opened');
                             $(document).unbind('click.hideNav');
                             nav.hide(function() {
                                 toggler.bind('click', showAndBind);
@@ -71,7 +83,7 @@ $(function() {
                 nav.show();
             }
         },
-        operatePlay: function() {
+        operatePlay: function(e) {
             var _this = this;
             if (this.now.src) {
                 if (this.now.paused) {
@@ -82,19 +94,29 @@ $(function() {
                     this.switchPlayButton(false);
                 }
             }
+            if (e)
+                e.preventDefault();
         },
         switchPlayButton: function(tf) {
             if (tf) {
-                this.$el.find('.play-img').stop(true).hide();
-                this.$el.find('.pause-img').stop(true).show();
+                this.$el.find('.play').addClass('playing')
             } else {
-                this.$el.find('.pause-img').stop(true).hide();
-                this.$el.find('.play-img').stop(true).show();
+                this.$el.find('.play').removeClass('playing')
             }
         },
-        operatePrev: function() {
+        operatePrev: function(e) {
+            if (this.playingView) {
+                this.playingView.playPrev();
+            }
+            if (e)
+                e.preventDefault();
         },
-        operateNext: function() {
+        operateNext: function(e) {
+            if (this.playingView) {
+                this.playingView.playNext();
+            }
+            if (e)
+                e.preventDefault();
         },
         logout: function() {
             App.logout();
@@ -103,6 +125,9 @@ $(function() {
     Player = new PlayerView();
 
     var Song = Backbone.Model.extend({
+        titleArtist: function() {
+            return this.get('name') + ' - ' + this.get('artist_name');
+        }
     });
     var SongCollection = Backbone.Collection.extend({
         model: Song,
@@ -151,6 +176,7 @@ $(function() {
         },
         initialize: function() {
             this.next = undefined;
+            this.prev = undefined;
             this.render();
 
             // extra events
@@ -163,6 +189,9 @@ $(function() {
         },
         set_next: function(next) {
             this.next = next;
+        },
+        set_prev: function(prev) {
+            this.prev = prev;
         },
         render: function() {
             this.$el.html(this.template(this.model.toJSON()));
@@ -186,7 +215,7 @@ $(function() {
             Player.$now.bind('timeupdate', function() {
                 // change progress
                 _this.$el.find('.progress').css('width', 100 * this.currentTime / this.duration + '%');
-                
+
                 // change time status
                 var minute = Math.floor(this.currentTime / 60),
                     second = Math.floor(this.currentTime - minute * 60);
@@ -204,6 +233,7 @@ $(function() {
             })
 
             Player.play(this.model.get('location'));
+            $('title').html('XiamiFav: ' + this.model.titleArtist());
             Player.switchPlayButton(true);
         },
         playNext: function() {
@@ -213,6 +243,10 @@ $(function() {
                 return;
             }
             this.next.play();
+        },
+        playPrev: function() {
+            if (this.prev)
+                this.prev.play();
         },
         stop: function() {
             this.$el.find('.progress').css('width', '0%');
@@ -259,7 +293,14 @@ $(function() {
                         _this.togglePlaylist(true);
                     });
                 }
-            })
+            });
+        },
+        fixControlPosition: function() {
+            var control = $('.control');
+            console.log('control', control.eq(0), control.width(), control.height());
+            $('.control-wrapper').css({'width': control.outerWidth(), 'height': control.outerHeight()});
+            control.css({'width': control.width(), 'height': control.height(), 'position': 'fixed'}, function() {
+            });
         },
         initPlaylist: function() {
             this.Songs = new SongCollection({user_id: this.user_id});
@@ -271,18 +312,36 @@ $(function() {
 
             // data fetching and app rendering now starts
             this.Songs.fetchPage();
+
+            // ui events
+            /*
+            $(document).bind('scroll.control', function() {
+                console.log('scrolled');
+                App.fixControlPosition();
+                $(document).unbind('scroll.control');
+            });
+            */
+            $(window).bind('keydown', function(e) {
+                if (e.keyCode == 32) {
+                    Player.operatePlay();
+                    e.preventDefault();
+                }
+            });
+
         },
         bindScroll: function() {
             var _this = this;
-            $(window).bind('scroll', function() {
-                if($(document).height() == $(window).scrollTop() + $(window).height()){
+            $(window).bind('scroll.fetch', function() {
+                //alert('scrolled ' + $(document).height() + '|' + ($(window).scrollTop() + $(window).height() + 1));
+                // Plus 1 fix for ipad (dont konw why)
+                if($(document).height() <= $(window).scrollTop() + $(window).height() + 1){
                     console.log('scrolled to end');
                     _this.Songs.fetchPage();
                 }
             });
         },
         unbindScroll: function() {
-            $(window).unbind('scroll');
+            $(window).unbind('scroll.fetch');
         },
         onFetching: function() {
             console.log('fetching');
@@ -432,12 +491,16 @@ $(function() {
             var view = new SongView({model: song});
             if (this.lastSongView) {
                 this.lastSongView.set_next(view);
+                view.set_prev(this.lastSongView);
             }
             this.lastSongView = view;
             this.$el.find('.playlist').append(view.el);
         },
+        onKeydown: function(e) {
+        }
     });
 
-    var App = new AppView();
+    App = new AppView();
+
 
 });

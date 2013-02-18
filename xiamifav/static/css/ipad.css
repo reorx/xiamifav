@@ -17,13 +17,13 @@
     line-height: 0.8em;
     padding: 0.5em 1em;
 }
-.toggler {
+.login .toggler {
     width: 2.6em;
     height: 2.6em;
     margin-top: 1em;
     margin-bottom: 1.5em;
 }
-.toggler div {
+.login .toggler div {
     width: 1.8em;
     height: 1.8em;
     margin: 0.4em;
@@ -40,4 +40,42 @@
 .playlist li span {
     font-size: 1.5em;
     padding: 1em 0.5em;
+}
+
+.control {
+    height: 4.5em;
+}
+.control .core {
+    width: 15em;
+}
+.control .core a {
+    display: block;
+    float: left;
+    width: 1em;
+    height: 100%;
+    padding: 0 2em;
+    text-align: center;
+}
+.control .core {
+}
+.control .nav-wrapper {
+    bottom: 1px;
+}
+.control .nav-wrapper .toggler {
+    margin: 0;
+    padding: 0.9em;
+    font-size: 1.5em;
+    text-decoration: none;
+    color: #444;
+    text-shadow: 1px 1px 1px white;
+    border-left: 1px solid #e3e3e3;
+}
+.nav-wrapper .nav {
+    top: 4.5em;
+}
+.nav-wrapper .nav li {
+    width: 10em;
+}
+.nav-wrapper .nav li a {
+    font-size: 1.5em;
 }
