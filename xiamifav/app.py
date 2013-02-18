@@ -88,7 +88,7 @@ application = tornado.web.Application(
     [
         ('/', HomeHandler),
         ('/login', LoginHandler),
-        ('/api_proxy/(\w+)', APIProxyHandler)
+        ('/api_proxy/(\w+)', APIProxyHandler),
     ],
     template_path=settings.TEMPLATE_PATH,
     static_path=settings.STATIC_PATH,
