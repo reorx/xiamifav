@@ -344,6 +344,9 @@ ul, li {
     max-width: 100%;
     overflow: hidden;
 }
+.playlist li:first-child {
+    border-top: 0;
+}
 .playlist li span {
     display: block;
     float: left;
