@@ -8,7 +8,7 @@ import tornado.web
 import tornado.ioloop
 import tornado.options
 import tornado.escape
-from tornado.httpclient import AsyncHTTPClient, HTTPClient
+from tornado.httpclient import AsyncHTTPClient
 from Cookie import SimpleCookie
 
 import settings
@@ -41,7 +41,7 @@ class LoginHandler(BaseHandler):
         if data['status'] != 'ok' or not 'user_id' in data:
             self.json_error(401, 'login failed')
             return
-        self.set_cookie('user_id', data['user_id'])
+        self.set_cookie('user_id', data['user_id'], expires_days=7)
 
         cookie_str = resp.headers.get('Set-Cookie')
         if cookie_str:
@@ -49,7 +49,7 @@ class LoginHandler(BaseHandler):
             cookie.load(cookie_str)
             if settings.XIAMI_AUTH_COOKIE in cookie:
                 auth_token = cookie.get(settings.XIAMI_AUTH_COOKIE).value
-                self.set_cookie(settings.XIAMI_AUTH_COOKIE, auth_token)
+                self.set_cookie(settings.XIAMI_AUTH_COOKIE, auth_token, expires_days=7)
         self.write(resp.body)
         self.finish()
 
