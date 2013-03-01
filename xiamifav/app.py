@@ -98,7 +98,7 @@ application = tornado.web.Application(
 if __name__ == '__main__':
     logging.getLogger().setLevel(logging.INFO)
     tornado.options.enable_pretty_logging()
-    port = os.environ.get('PORT', 7000)
+    port = os.getenv('PORT', 7000)
     logging.info('port: %s', port)
     application.listen(port)
     tornado.ioloop.IOLoop.instance().start()
