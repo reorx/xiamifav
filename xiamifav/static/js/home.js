@@ -466,7 +466,7 @@ $(function() {
         },
         afterLogin: function(user_id) {
             this.user_id = user_id;
-            $.cookie('user_id', user_id);
+            $.cookie('user_id', user_id, {expires: 7});
 
             var _this = this;
             _this.toggleLogin(false, function() {
