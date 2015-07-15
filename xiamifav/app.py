@@ -5,14 +5,18 @@
 import os
 import logging
 import tornado.web
+from tornado.options import define, options
 import tornado.ioloop
-import tornado.options
+import tornado.log
 import tornado.escape
 from tornado.httpclient import AsyncHTTPClient
 from Cookie import SimpleCookie
 
 import settings
 from base import BaseHandler, HomeHandler
+
+
+define('debug', default='False')
 
 
 class LoginHandler(BaseHandler):
@@ -29,9 +33,7 @@ class LoginHandler(BaseHandler):
             'User-Agent': settings.FAKE_USER_AGENT,
         }
 
-        #client = HTTPClient()
         client = AsyncHTTPClient()
-        #resp = client.fetch(url, headers=headers)
         client.fetch(url, self._on_api_response, headers=headers)
 
     def _on_api_response(self, resp):
@@ -84,21 +86,33 @@ class APIProxyHandler(BaseHandler):
         self.finish()
 
 
-application = tornado.web.Application(
-    [
-        ('/', HomeHandler),
-        ('/login', LoginHandler),
-        ('/api_proxy/(\w+)', APIProxyHandler),
-    ],
-    template_path=settings.TEMPLATE_PATH,
-    static_path=settings.STATIC_PATH,
-    debug=True)
+def make_application(debug=False):
+    application = tornado.web.Application(
+        [
+            ('/', HomeHandler),
+            ('/login', LoginHandler),
+            ('/api_proxy/(\w+)', APIProxyHandler),
+        ],
+        template_path=settings.TEMPLATE_PATH,
+        static_path=settings.STATIC_PATH,
+        debug=debug)
+    return application
 
 
 if __name__ == '__main__':
     logging.getLogger().setLevel(logging.INFO)
-    tornado.options.enable_pretty_logging()
+    tornado.log.enable_pretty_logging()
+
+    tornado.options.parse_command_line()
+    if options.debug == 'True':
+        debug = True
+    else:
+        debug = False
+    logging.info('debug: %s', debug)
+    application = make_application(debug)
+
     port = os.getenv('PORT', 7000)
     logging.info('port: %s', port)
     application.listen(port)
+
     tornado.ioloop.IOLoop.instance().start()
